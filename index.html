@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ניהול משימות">
-    <link rel="manifest" href="manifest.json">
     <title>ניהול משימות</title>
     <style>
         * {
@@ -41,6 +40,41 @@
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
             font-weight: 600;
+        }
+
+        .view-toggle {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            background: #F7F6F3;
+            color: #37352F;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            background: #E8EDF2;
+        }
+
+        .toggle-btn.active {
+            background: #5B7C99;
+            color: white;
+            border-color: #5B7C99;
         }
 
         .install-banner {
@@ -223,11 +257,16 @@
             font-size: 0.9em;
         }
 
-        .boards {
+        /* תצוגת לוחות */
+        .boards-view {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
+        }
+
+        .boards-view.hidden {
+            display: none;
         }
 
         .board {
@@ -269,6 +308,149 @@
             min-height: 200px;
         }
 
+        /* תצוגת טבלה */
+        .table-view {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .table-view.active {
+            display: block;
+        }
+
+        .tasks-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .tasks-table thead {
+            background: #F7F6F3;
+            position: sticky;
+            top: 0;
+        }
+
+        .tasks-table th {
+            padding: 12px;
+            text-align: right;
+            font-weight: 600;
+            color: #37352F;
+            border-bottom: 2px solid #E3E2E0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tasks-table th:hover {
+            background: #E8EDF2;
+        }
+
+        .tasks-table th.sortable::after {
+            content: ' ⇅';
+            opacity: 0.3;
+        }
+
+        .tasks-table th.sorted-asc::after {
+            content: ' ↑';
+            opacity: 1;
+        }
+
+        .tasks-table th.sorted-desc::after {
+            content: ' ↓';
+            opacity: 1;
+        }
+
+        .tasks-table td {
+            padding: 12px;
+            border-bottom: 1px solid #F7F6F3;
+        }
+
+        .tasks-table tr:hover {
+            background: #FBFBFA;
+        }
+
+        .table-task-title {
+            font-weight: 500;
+            color: #37352F;
+            max-width: 300px;
+        }
+
+        .table-category {
+            display: inline-block;
+            background: #E8EDF2;
+            color: #5B7C99;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .table-priority {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .table-priority.high {
+            background: #F3E5E5;
+            color: #C1665A;
+        }
+
+        .table-priority.medium {
+            background: #F9EFE0;
+            color: #C89F5D;
+        }
+
+        .table-priority.low {
+            background: #E8F3EC;
+            color: #6B9080;
+        }
+
+        .table-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .table-status.todo {
+            background: #E8EDF2;
+            color: #5B7C99;
+        }
+
+        .table-status.in-progress {
+            background: #F9EFE0;
+            color: #C89F5D;
+        }
+
+        .table-status.done {
+            background: #E8F3EC;
+            color: #6B9080;
+        }
+
+        .table-date {
+            color: #787774;
+            font-size: 0.9em;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .table-subtasks {
+            font-size: 0.85em;
+            color: #787774;
+        }
+
+        /* תצוגת משימה רגילה */
         .task {
             background: #FBFBFA;
             padding: 15px;
@@ -626,7 +808,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .boards {
+            .boards-view {
                 grid-template-columns: 1fr;
             }
 
@@ -651,6 +833,19 @@
                 width: 95%;
                 padding: 20px;
             }
+
+            .tasks-table {
+                font-size: 0.85em;
+            }
+
+            .table-view {
+                padding: 10px;
+            }
+
+            .toggle-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+            }
         }
     </style>
 </head>
@@ -660,6 +855,15 @@
             <h1>📋 ניהול משימות</h1>
             <p>פשוט, נקי ויעיל</p>
         </header>
+
+        <div class="view-toggle">
+            <button class="toggle-btn active" onclick="switchView('board')" id="boardViewBtn">
+                <span>📊</span> תצוגת לוחות
+            </button>
+            <button class="toggle-btn" onclick="switchView('table')" id="tableViewBtn">
+                <span>📋</span> תצוגת טבלה
+            </button>
+        </div>
 
         <div class="install-banner" id="installBanner">
             <div class="install-banner-text">
@@ -746,7 +950,27 @@
             </div>
         </div>
 
-        <div class="boards">
+        <!-- תצוגת טבלה -->
+        <div class="table-view" id="tableView">
+            <table class="tasks-table">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="sortTable('title')">משימה</th>
+                        <th class="sortable" onclick="sortTable('category')">קטגוריה</th>
+                        <th class="sortable" onclick="sortTable('priority')">עדיפות</th>
+                        <th class="sortable" onclick="sortTable('date')">תאריך יעד</th>
+                        <th class="sortable" onclick="sortTable('status')">סטטוס</th>
+                        <th>תתי-משימות</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- תצוגת לוחות -->
+        <div class="boards-view" id="boardsView">
             <div class="board todo" data-status="todo">
                 <div class="board-header">
                     <span class="board-icon">📝</span>
@@ -843,6 +1067,9 @@
         let filteredTasks = [];
         let deferredPrompt;
         let editingTaskId = null;
+        let currentView = 'board';
+        let sortColumn = null;
+        let sortDirection = 'asc';
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js')
@@ -885,16 +1112,137 @@
             document.getElementById('offlineIndicator').classList.add('show');
         });
 
+        // החלפת תצוגה
+        function switchView(view) {
+            currentView = view;
+            localStorage.setItem('preferredView', view);
+            
+            const boardView = document.getElementById('boardsView');
+            const tableView = document.getElementById('tableView');
+            const boardBtn = document.getElementById('boardViewBtn');
+            const tableBtn = document.getElementById('tableViewBtn');
+
+            if (view === 'board') {
+                boardView.classList.remove('hidden');
+                tableView.classList.remove('active');
+                boardBtn.classList.add('active');
+                tableBtn.classList.remove('active');
+            } else {
+                boardView.classList.add('hidden');
+                tableView.classList.add('active');
+                boardBtn.classList.remove('active');
+                tableBtn.classList.add('active');
+                renderTableView();
+            }
+        }
+
+        // מיון טבלה
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            // עדכון אייקונים
+            document.querySelectorAll('.tasks-table th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+
+            const clickedHeader = event.target;
+            clickedHeader.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+
+            // מיון המשימות
+            filteredTasks.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                // טיפול במקרים מיוחדים
+                if (column === 'date') {
+                    aVal = aVal || '9999-12-31';
+                    bVal = bVal || '9999-12-31';
+                }
+
+                if (column === 'priority') {
+                    const priorityOrder = { high: 3, medium: 2, low: 1 };
+                    aVal = priorityOrder[a.priority];
+                    bVal = priorityOrder[b.priority];
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderTableView();
+        }
+
+        // רינדור תצוגת טבלה
+        function renderTableView() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const priorityText = {
+                'high': 'דחוף',
+                'medium': 'בינוני',
+                'low': 'רגיל'
+            };
+
+            const statusText = {
+                'todo': 'לעשות',
+                'in-progress': 'בתהליך',
+                'done': 'הושלם'
+            };
+
+            filteredTasks.forEach(task => {
+                const row = document.createElement('tr');
+                
+                const subtasksInfo = task.subtasks && task.subtasks.length > 0 
+                    ? `${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length}`
+                    : '-';
+
+                const dateText = task.date ? formatDate(task.date) : '-';
+                const isOverdue = task.date && new Date(task.date) < new Date() && task.status !== 'done';
+
+                row.innerHTML = `
+                    <td>
+                        <div class="table-task-title">${task.title}</div>
+                        ${shouldShowReminder(task) ? '<span class="reminder-badge">🔔 מחר!</span>' : ''}
+                    </td>
+                    <td><span class="table-category">${task.category}</span></td>
+                    <td><span class="table-priority ${task.priority}">${priorityText[task.priority]}</span></td>
+                    <td class="table-date">${dateText}${isOverdue ? ' ⚠️' : ''}</td>
+                    <td><span class="table-status ${task.status}">${statusText[task.status]}</span></td>
+                    <td class="table-subtasks">${subtasksInfo}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn-small btn-edit" onclick="openEditModal(${task.id})">✏️</button>
+                            <button class="btn-small btn-delete" onclick="deleteTask(${task.id})">🗑️</button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
         function loadTasks() {
             const saved = localStorage.getItem('tasksAdvanced');
             if (saved) {
                 tasks = JSON.parse(saved);
-                // וודא שלכל משימה יש מערך תתי-משימות
                 tasks = tasks.map(task => ({
                     ...task,
                     subtasks: task.subtasks || []
                 }));
                 filteredTasks = [...tasks];
+                
+                // טען העדפת תצוגה
+                const savedView = localStorage.getItem('preferredView');
+                if (savedView) {
+                    switchView(savedView);
+                }
+                
                 renderAllTasks();
                 updateStats();
                 checkDailyReminders();
@@ -967,7 +1315,6 @@
             }
         }
 
-        // תתי-משימות
         function addSubtask(taskId, subtaskText) {
             const task = tasks.find(t => t.id === taskId);
             if (task && subtaskText.trim()) {
@@ -1067,6 +1414,15 @@
         }
 
         function renderAllTasks() {
+            if (currentView === 'board') {
+                renderBoardView();
+            } else {
+                renderTableView();
+            }
+            updateCounts();
+        }
+
+        function renderBoardView() {
             const statuses = ['todo', 'in-progress', 'done'];
             statuses.forEach(status => {
                 const list = document.getElementById(`list-${status}`);
@@ -1078,8 +1434,6 @@
                 const taskElement = createTaskElement(task);
                 list.appendChild(taskElement);
             });
-
-            updateCounts();
         }
 
         function createTaskElement(task) {
@@ -1099,7 +1453,6 @@
             const isOverdue = task.date && new Date(task.date) < new Date() && task.status !== 'done';
             const reminderBadge = shouldShowReminder(task) ? '<span class="reminder-badge">🔔 מחר!</span>' : '';
 
-            // תתי-משימות
             let subtasksHTML = '';
             if (task.subtasks && task.subtasks.length > 0) {
                 subtasksHTML = '<div class="subtasks-container">';
@@ -1117,7 +1470,6 @@
                 subtasksHTML += '</div>';
             }
 
-            // טופס הוספת תת-משימה
             const addSubtaskForm = `
                 <div class="add-subtask-form">
                     <input type="text" placeholder="הוסף תת-משימה..." id="subtask-input-${task.id}">
@@ -1195,8 +1547,7 @@
             if (reminderTasks.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
                 reminderTasks.forEach(task => {
                     new Notification('תזכורת למחר! 🔔', {
-                        body: task.title,
-                        icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%235B7C99"/%3E%3Ctext x="50" y="70" font-size="60" text-anchor="middle" fill="white"%3E📋%3C/text%3E%3C/svg%3E'
+                        body: task.title
                     });
                 });
             }

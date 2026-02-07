@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="אפליקציה לניהול משימות אישיות">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ניהול משימות">
+    <link rel="manifest" href="manifest.json">
+    <title>ניהול משימות - PWA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .install-banner {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        .install-banner-text {
+            flex: 1;
+        }
+
+        .install-banner-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .controls-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        input[type="text"], 
+        input[type="date"],
+        select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            background: white;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-install {
+            background: #e74c3c;
+        }
+
+        .btn-install:hover {
+            background: #c0392b;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-section input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .stats-bar {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .boards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .board {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .board-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .board-icon {
+            font-size: 24px;
+        }
+
+        .board-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .board-count {
+            margin-right: auto;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .task-list {
+            min-height: 200px;
+        }
+
+        .task {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 4px solid #667eea;
+            cursor: move;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .task.dragging {
+            opacity: 0.5;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #333;
+            flex: 1;
+        }
+
+        .priority-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .priority-high {
+            background: #ff4757;
+            color: white;
+        }
+
+        .priority-medium {
+            background: #ffa502;
+            color: white;
+        }
+
+        .priority-low {
+            background: #26de81;
+            color: white;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .category-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+
+        .btn-delete {
+            background: #ff4757;
+        }
+
+        .btn-delete:hover {
+            background: #ee2f3b;
+        }
+
+        .board.todo .board-header { color: #667eea; }
+        .board.in-progress .board-header { color: #f39c12; }
+        .board.done .board-header { color: #27ae60; }
+
+        .board.todo .task { border-right-color: #667eea; }
+        .board.in-progress .task { border-right-color: #f39c12; }
+        .board.done .task { border-right-color: #27ae60; }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .offline-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .offline-indicator.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-bottom: 80px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .boards {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+
+            .stats-bar {
+                gap: 10px;
+            }
+
+            .stat-item {
+                flex: 1 1 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📱 ניהול המשימות שלי - PWA</h1>
+            <p>עובד גם בלי אינטרנט!</p>
+        </header>
+
+        <!-- באנר התקנה -->
+        <div class="install-banner" id="installBanner">
+            <div class="install-banner-text">
+                <div class="install-banner-title">📲 התקן את האפליקציה</div>
+                <div>הוסף למסך הבית לגישה מהירה!</div>
+            </div>
+            <button class="btn-install" id="installButton">התקן</button>
+            <button class="btn-secondary btn-small" onclick="closeInstallBanner()">לא עכשיו</button>
+        </div>
+
+        <!-- סטטיסטיקות -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number" id="stat-total">0</div>
+                <div class="stat-label">סך הכל</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-todo">0</div>
+                <div class="stat-label">לעשות</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-progress">0</div>
+                <div class="stat-label">בתהליך</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-done">0</div>
+                <div class="stat-label">הושלם</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-overdue">0</div>
+                <div class="stat-label">באיחור</div>
+            </div>
+        </div>
+
+        <!-- הוספת משימה -->
+        <div class="controls-section">
+            <div class="section-title">➕ הוסף משימה חדשה</div>
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="מה צריך לעשות?">
+                <input type="date" id="taskDate">
+                <select id="taskPriority">
+                    <option value="low">רגיל</option>
+                    <option value="medium">בינוני</option>
+                    <option value="high">דחוף</option>
+                </select>
+                <button onclick="addTask()">הוסף</button>
+            </div>
+            <div class="input-row">
+                <select id="taskCategory">
+                    <option value="עבודה">עבודה 💼</option>
+                    <option value="בית">בית 🏠</option>
+                    <option value="קניות">קניות 🛒</option>
+                    <option value="כושר">כושר 💪</option>
+                    <option value="לימודים">לימודים 📚</option>
+                    <option value="אישי">אישי 👤</option>
+                </select>
+                <select id="taskStatus">
+                    <option value="todo">לעשות</option>
+                    <option value="in-progress">בתהליך</option>
+                    <option value="done">הושלם</option>
+                </select>
+                <button onclick="checkReminders()" class="btn-secondary">🔔 תזכורות</button>
+            </div>
+        </div>
+
+        <!-- חיפוש וסינון -->
+        <div class="controls-section">
+            <div class="section-title">🔍 חיפוש וסינון</div>
+            <div class="filter-section">
+                <input type="text" id="searchInput" placeholder="חפש משימה..." onkeyup="filterTasks()">
+                <select id="filterCategory" onchange="filterTasks()">
+                    <option value="">כל הקטגוריות</option>
+                    <option value="עבודה">עבודה</option>
+                    <option value="בית">בית</option>
+                    <option value="קניות">קניות</option>
+                    <option value="כושר">כושר</option>
+                    <option value="לימודים">לימודים</option>
+                    <option value="אישי">אישי</option>
+                </select>
+                <select id="filterPriority" onchange="filterTasks()">
+                    <option value="">כל העדיפויות</option>
+                    <option value="high">דחוף</option>
+                    <option value="medium">בינוני</option>
+                    <option value="low">רגיל</option>
+                </select>
+                <button onclick="clearFilters()" class="btn-secondary">נקה</button>
+            </div>
+        </div>
+
+        <!-- ייצוא -->
+        <div class="controls-section">
+            <div class="section-title">📥 ייצוא נתונים</div>
+            <div class="export-buttons">
+                <button onclick="exportToJSON()" class="btn-success">JSON</button>
+                <button onclick="exportToCSV()" class="btn-success">CSV</button>
+                <button onclick="exportToText()" class="btn-success">TXT</button>
+            </div>
+        </div>
+
+        <!-- לוחות -->
+        <div class="boards">
+            <div class="board todo" data-status="todo">
+                <div class="board-header">
+                    <span class="board-icon">📝</span>
+                    <span class="board-title">לעשות</span>
+                    <span class="board-count" id="count-todo">0</span>
+                </div>
+                <div class="task-list" id="list-todo"></div>
+            </div>
+
+            <div class="board in-progress" data-status="in-progress">
+                <div class="board-header">
+                    <span class="board-icon">⚡</span>
+                    <span class="board-title">בתהליך</span>
+                    <span class="board-count" id="count-in-progress">0</span>
+                </div>
+                <div class="task-list" id="list-in-progress"></div>
+            </div>
+
+            <div class="board done" data-status="done">
+                <div class="board-header">
+                    <span class="board-icon">✅</span>
+                    <span class="board-title">הושלם</span>
+                    <span class="board-count" id="count-done">0</span>
+                </div>
+                <div class="task-list" id="list-done"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- התראה -->
+    <div class="notification" id="notification"></div>
+
+    <!-- אינדיקטור אופליין -->
+    <div class="offline-indicator" id="offlineIndicator">
+        📡 אין חיבור לאינטרנט - עובד במצב אופליין
+    </div>
+
+    <script>
+        let tasks = [];
+        let filteredTasks = [];
+        let deferredPrompt;
+
+        // רישום Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker רשום בהצלחה'))
+                .catch(err => console.log('שגיאה ברישום Service Worker:', err));
+        }
+
+        // האזנה לאירוע התקנה
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('show');
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showNotification('האפליקציה הותקנה בהצלחה! 🎉');
+                }
+                deferredPrompt = null;
+                closeInstallBanner();
+            }
+        });
+
+        function closeInstallBanner() {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        // בדיקת מצב אונליין/אופליין
+        window.addEventListener('online', () => {
+            document.getElementById('offlineIndicator').classList.remove('show');
+            showNotification('חזרת לחיבור אינטרנט 🌐');
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('offlineIndicator').classList.add('show');
+        });
+
+        function loadTasks() {
+            const saved = localStorage.getItem('tasksAdvanced');
+            if (saved) {
+                tasks = JSON.parse(saved);
+                filteredTasks = [...tasks];
+                renderAllTasks();
+                updateStats();
+            }
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasksAdvanced', JSON.stringify(tasks));
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const dateInput = document.getElementById('taskDate');
+            const statusInput = document.getElementById('taskStatus');
+            const priorityInput = document.getElementById('taskPriority');
+            const categoryInput = document.getElementById('taskCategory');
+
+            const title = input.value.trim();
+            
+            if (title === '') {
+                showNotification('נא להזין שם משימה');
+                return;
+            }
+
+            const task = {
+                id: Date.now(),
+                title: title,
+                date: dateInput.value,
+                status: statusInput.value,
+                priority: priorityInput.value,
+                category: categoryInput.value,
+                createdAt: new Date().toISOString(),
+                notified: false
+            };
+
+            tasks.push(task);
+            saveTasks();
+            filteredTasks = [...tasks];
+            renderAllTasks();
+            updateStats();
+
+            input.value = '';
+            dateInput.value = '';
+            statusInput.value = 'todo';
+            priorityInput.value = 'low';
+
+            showNotification('המשימה נוספה! ✅');
+        }
+
+        function deleteTask(id) {
+            if (confirm('למחוק משימה זו?')) {
+                tasks = tasks.filter(task => task.id !== id);
+                saveTasks();
+                filteredTasks = [...tasks];
+                renderAllTasks();
+                updateStats();
+                showNotification('המשימה נמחקה');
+            }
+        }
+
+        function moveTask(id, newStatus) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = newStatus;
+                saveTasks();
+                filteredTasks = [...tasks];
+                renderAllTasks();
+                updateStats();
+            }
+        }
+
+        function filterTasks() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const filterCat = document.getElementById('filterCategory').value;
+            const filterPri = document.getElementById('filterPriority').value;
+
+            filteredTasks = tasks.filter(task => {
+                const matchSearch = task.title.toLowerCase().includes(searchText);
+                const matchCategory = !filterCat || task.category === filterCat;
+                const matchPriority = !filterPri || task.priority === filterPri;
+                
+                return matchSearch && matchCategory && matchPriority;
+            });
+
+            renderAllTasks();
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterPriority').value = '';
+            filteredTasks = [...tasks];
+            renderAllTasks();
+        }
+
+        function renderAllTasks() {
+            const statuses = ['todo', 'in-progress', 'done'];
+            statuses.forEach(status => {
+                const list = document.getElementById(`list-${status}`);
+                list.innerHTML = '';
+            });
+
+            filteredTasks.forEach(task => {
+                const list = document.getElementById(`list-${task.status}`);
+                const taskElement = createTaskElement(task);
+                list.appendChild(taskElement);
+            });
+
+            updateCounts();
+        }
+
+        function createTaskElement(task) {
+            const div = document.createElement('div');
+            div.className = 'task';
+            div.draggable = true;
+            div.dataset.id = task.id;
+
+            const priorityText = {
+                'high': 'דחוף 🔥',
+                'medium': 'בינוני ⚡',
+                'low': 'רגיל ✓'
+            };
+
+            const priorityClass = `priority-${task.priority}`;
+            const dateText = task.date ? `📅 ${formatDate(task.date)}` : '';
+            const isOverdue = task.date && new Date(task.date) < new Date() && task.status !== 'done';
+
+            div.innerHTML = `
+                <div class="task-header">
+                    <div class="task-title">${task.title}</div>
+                    <span class="priority-badge ${priorityClass}">${priorityText[task.priority]}</span>
+                </div>
+                <div class="task-meta">
+                    <span class="category-tag">${task.category}</span>
+                    ${dateText ? `<span class="meta-item">${dateText}${isOverdue ? ' ⚠️' : ''}</span>` : ''}
+                </div>
+                <div class="task-actions">
+                    ${task.status !== 'todo' ? '<button class="btn-small" onclick="moveTask(' + task.id + ', \'todo\')">◀ לעשות</button>' : ''}
+                    ${task.status !== 'in-progress' ? '<button class="btn-small" onclick="moveTask(' + task.id + ', \'in-progress\')">⚡ בתהליך</button>' : ''}
+                    ${task.status !== 'done' ? '<button class="btn-small" onclick="moveTask(' + task.id + ', \'done\')">✅ הושלם</button>' : ''}
+                    <button class="btn-small btn-delete" onclick="deleteTask(' + task.id + ')">🗑️</button>
+                </div>
+            `;
+
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragend', handleDragEnd);
+
+            return div;
+        }
+
+        let draggedTask = null;
+
+        function handleDragStart(e) {
+            draggedTask = this;
+            this.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+        }
+
+        document.querySelectorAll('.task-list').forEach(list => {
+            list.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+
+            list.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (draggedTask) {
+                    const newStatus = this.id.replace('list-', '');
+                    const taskId = parseInt(draggedTask.dataset.id);
+                    moveTask(taskId, newStatus);
+                }
+            });
+        });
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('he-IL');
+        }
+
+        function updateCounts() {
+            const statuses = ['todo', 'in-progress', 'done'];
+            statuses.forEach(status => {
+                const count = filteredTasks.filter(t => t.status === status).length;
+                document.getElementById(`count-${status}`).textContent = count;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = tasks.length;
+            document.getElementById('stat-todo').textContent = tasks.filter(t => t.status === 'todo').length;
+            document.getElementById('stat-progress').textContent = tasks.filter(t => t.status === 'in-progress').length;
+            document.getElementById('stat-done').textContent = tasks.filter(t => t.status === 'done').length;
+            
+            const overdue = tasks.filter(t => {
+                return t.date && new Date(t.date) < new Date() && t.status !== 'done';
+            }).length;
+            document.getElementById('stat-overdue').textContent = overdue;
+        }
+
+        function checkReminders() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            let reminderCount = 0;
+            let reminderMessages = [];
+
+            tasks.forEach(task => {
+                if (task.status !== 'done' && task.date) {
+                    const taskDate = new Date(task.date);
+                    taskDate.setHours(0, 0, 0, 0);
+
+                    if (taskDate < today && !task.notified) {
+                        reminderMessages.push(`⚠️ באיחור: ${task.title}`);
+                        reminderCount++;
+                    } else if (taskDate.getTime() === today.getTime()) {
+                        reminderMessages.push(`📅 היום: ${task.title}`);
+                        reminderCount++;
+                    } else if (taskDate.getTime() === tomorrow.getTime()) {
+                        reminderMessages.push(`⏰ מחר: ${task.title}`);
+                        reminderCount++;
+                    }
+                }
+            });
+
+            if (reminderCount > 0) {
+                const message = reminderMessages.join('\n');
+                alert(`יש לך ${reminderCount} תזכורות:\n\n${message}`);
+            } else {
+                showNotification('אין תזכורות 😊');
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function exportToJSON() {
+            const dataStr = JSON.stringify(tasks, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            downloadFile(dataBlob, 'tasks.json');
+            showNotification('הורד JSON!');
+        }
+
+        function exportToCSV() {
+            const headers = ['כותרת', 'סטטוס', 'קטגוריה', 'עדיפות', 'תאריך', 'נוצר'];
+            const rows = tasks.map(task => [
+                task.title,
+                task.status === 'todo' ? 'לעשות' : task.status === 'in-progress' ? 'בתהליך' : 'הושלם',
+                task.category,
+                task.priority === 'high' ? 'דחוף' : task.priority === 'medium' ? 'בינוני' : 'רגיל',
+                task.date || '',
+                new Date(task.createdAt).toLocaleDateString('he-IL')
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+
+            const BOM = '\uFEFF';
+            const dataBlob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            downloadFile(dataBlob, 'tasks.csv');
+            showNotification('הורד CSV!');
+        }
+
+        function exportToText() {
+            let text = '📋 דוח משימות\n' + '='.repeat(50) + '\n\n';
+
+            const statuses = {
+                'todo': '📝 לעשות',
+                'in-progress': '⚡ בתהליך',
+                'done': '✅ הושלם'
+            };
+
+            Object.keys(statuses).forEach(status => {
+                const statusTasks = tasks.filter(t => t.status === status);
+                if (statusTasks.length > 0) {
+                    text += `\n${statuses[status]} (${statusTasks.length})\n`;
+                    text += '-'.repeat(50) + '\n';
+                    
+                    statusTasks.forEach((task, index) => {
+                        text += `${index + 1}. ${task.title}\n`;
+                        text += `   קטגוריה: ${task.category}\n`;
+                        text += `   עדיפות: ${task.priority === 'high' ? 'דחוף' : task.priority === 'medium' ? 'בינוני' : 'רגיל'}\n`;
+                        if (task.date) {
+                            text += `   תאריך: ${formatDate(task.date)}\n`;
+                        }
+                        text += '\n';
+                    });
+                }
+            });
+
+            const dataBlob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+            downloadFile(dataBlob, 'tasks.txt');
+            showNotification('הורד TXT!');
+        }
+
+        function downloadFile(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        loadTasks();
+    </script>
+</body>
+</html>

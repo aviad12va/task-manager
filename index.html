@@ -1219,6 +1219,8 @@
                 tableView.classList.remove('active');
                 boardBtn.classList.add('active');
                 tableBtn.classList.remove('active');
+                renderBoardView();
+                updateCounts();
             } else {
                 boardView.classList.add('hidden');
                 tableView.classList.add('active');
@@ -1320,16 +1322,18 @@
                 tasks = JSON.parse(saved);
                 tasks = tasks.map(task => ({
                     ...task,
-                    subtasks: task.subtasks || []
+                    subtasks: task.subtasks || [],
+                    expanded: task.expanded || false
                 }));
                 filteredTasks = [...tasks];
                 
                 const savedView = localStorage.getItem('preferredView');
                 if (savedView) {
                     switchView(savedView);
+                } else {
+                    renderAllTasks();
                 }
                 
-                renderAllTasks();
                 updateStats();
                 checkDailyReminders();
             }

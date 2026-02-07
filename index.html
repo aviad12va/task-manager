@@ -257,7 +257,6 @@
             font-size: 0.9em;
         }
 
-        /* תצוגת לוחות */
         .boards-view {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -308,7 +307,6 @@
             min-height: 200px;
         }
 
-        /* תצוגת טבלה */
         .table-view {
             display: none;
             background: white;
@@ -450,14 +448,12 @@
             color: #787774;
         }
 
-        /* תצוגת משימה רגילה */
         .task {
             background: #FBFBFA;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 10px;
             border-right: 3px solid #5B7C99;
-            cursor: move;
             transition: all 0.2s;
         }
 
@@ -471,6 +467,10 @@
             opacity: 0.5;
         }
 
+        .task-main {
+            cursor: pointer;
+        }
+
         .task-header {
             display: flex;
             justify-content: space-between;
@@ -478,11 +478,27 @@
             margin-bottom: 10px;
         }
 
+        .task-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .collapse-icon {
+            font-size: 0.8em;
+            color: #787774;
+            transition: transform 0.2s;
+        }
+
+        .collapse-icon.expanded {
+            transform: rotate(90deg);
+        }
+
         .task-title {
             font-weight: 500;
             font-size: 1.05em;
             color: #37352F;
-            flex: 1;
         }
 
         .priority-badge {
@@ -545,28 +561,63 @@
             50% { opacity: 0.7; }
         }
 
-        .subtasks-container {
+        /* ערסל תתי-משימות */
+        .subtasks-accordion {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 0;
+        }
+
+        .subtasks-accordion.expanded {
+            max-height: 1000px;
             margin-top: 12px;
+        }
+
+        .subtasks-container {
+            padding: 12px;
             padding-right: 16px;
-            border-right: 2px solid #E8EDF2;
+            background: #F7F6F3;
+            border-radius: 6px;
+            border-right: 3px solid #E8EDF2;
+        }
+
+        .subtasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E3E2E0;
+        }
+
+        .subtasks-title {
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #37352F;
         }
 
         .subtask {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 0;
+            padding: 8px 0;
             font-size: 0.9em;
             color: #787774;
+            border-bottom: 1px solid #E8EDF2;
+        }
+
+        .subtask:last-of-type {
+            border-bottom: none;
         }
 
         .subtask input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
         }
 
-        .subtask.completed {
+        .subtask.completed .subtask-text {
             text-decoration: line-through;
             opacity: 0.6;
         }
@@ -575,36 +626,60 @@
             flex: 1;
         }
 
-        .subtask-delete {
-            background: none;
-            border: none;
-            color: #C1665A;
-            cursor: pointer;
-            padding: 2px 6px;
-            font-size: 0.9em;
+        .subtask-actions {
+            display: flex;
+            gap: 4px;
             opacity: 0;
             transition: opacity 0.2s;
         }
 
-        .subtask:hover .subtask-delete {
+        .subtask:hover .subtask-actions {
             opacity: 1;
+        }
+
+        .subtask-btn {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .subtask-edit {
+            color: #5B7C99;
+        }
+
+        .subtask-edit:hover {
+            background: #E8EDF2;
+        }
+
+        .subtask-delete {
+            color: #C1665A;
+        }
+
+        .subtask-delete:hover {
+            background: #F3E5E5;
         }
 
         .add-subtask-form {
             display: flex;
             gap: 6px;
-            margin-top: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #E3E2E0;
         }
 
         .add-subtask-form input {
             flex: 1;
-            padding: 6px 10px;
-            font-size: 0.85em;
+            padding: 8px 10px;
+            font-size: 0.9em;
         }
 
         .add-subtask-form button {
-            padding: 6px 12px;
-            font-size: 0.85em;
+            padding: 8px 14px;
+            font-size: 0.9em;
         }
 
         .task-actions {
@@ -950,7 +1025,6 @@
             </div>
         </div>
 
-        <!-- תצוגת טבלה -->
         <div class="table-view" id="tableView">
             <table class="tasks-table">
                 <thead>
@@ -969,7 +1043,6 @@
             </table>
         </div>
 
-        <!-- תצוגת לוחות -->
         <div class="boards-view" id="boardsView">
             <div class="board todo" data-status="todo">
                 <div class="board-header">
@@ -1014,6 +1087,7 @@
         📡 אין חיבור - עובד אופליין
     </div>
 
+    <!-- Modal עריכת משימה -->
     <div class="modal" id="editModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1062,11 +1136,30 @@
         </div>
     </div>
 
+    <!-- Modal עריכת תת-משימה -->
+    <div class="modal" id="editSubtaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">✏️ ערוך תת-משימה</div>
+                <button class="close-modal" onclick="closeEditSubtaskModal()">&times;</button>
+            </div>
+            <div class="modal-field">
+                <label class="modal-label">תיאור תת-משימה</label>
+                <input type="text" id="editSubtaskText" style="width: 100%;">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="saveEditedSubtask()" class="btn-success">💾 שמור</button>
+                <button onclick="closeEditSubtaskModal()" class="btn-secondary">ביטול</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let tasks = [];
         let filteredTasks = [];
         let deferredPrompt;
         let editingTaskId = null;
+        let editingSubtaskId = null;
         let currentView = 'board';
         let sortColumn = null;
         let sortDirection = 'asc';
@@ -1112,7 +1205,6 @@
             document.getElementById('offlineIndicator').classList.add('show');
         });
 
-        // החלפת תצוגה
         function switchView(view) {
             currentView = view;
             localStorage.setItem('preferredView', view);
@@ -1136,7 +1228,6 @@
             }
         }
 
-        // מיון טבלה
         function sortTable(column) {
             if (sortColumn === column) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -1145,7 +1236,6 @@
                 sortDirection = 'asc';
             }
 
-            // עדכון אייקונים
             document.querySelectorAll('.tasks-table th').forEach(th => {
                 th.classList.remove('sorted-asc', 'sorted-desc');
             });
@@ -1153,12 +1243,10 @@
             const clickedHeader = event.target;
             clickedHeader.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
 
-            // מיון המשימות
             filteredTasks.sort((a, b) => {
                 let aVal = a[column];
                 let bVal = b[column];
 
-                // טיפול במקרים מיוחדים
                 if (column === 'date') {
                     aVal = aVal || '9999-12-31';
                     bVal = bVal || '9999-12-31';
@@ -1178,7 +1266,6 @@
             renderTableView();
         }
 
-        // רינדור תצוגת טבלה
         function renderTableView() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
@@ -1237,7 +1324,6 @@
                 }));
                 filteredTasks = [...tasks];
                 
-                // טען העדפת תצוגה
                 const savedView = localStorage.getItem('preferredView');
                 if (savedView) {
                     switchView(savedView);
@@ -1276,7 +1362,8 @@
                 category: categoryInput.value,
                 createdAt: new Date().toISOString(),
                 notified: false,
-                subtasks: []
+                subtasks: [],
+                expanded: false
             };
 
             tasks.push(task);
@@ -1315,6 +1402,15 @@
             }
         }
 
+        function toggleSubtasksAccordion(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+                task.expanded = !task.expanded;
+                saveTasks();
+                renderAllTasks();
+            }
+        }
+
         function addSubtask(taskId, subtaskText) {
             const task = tasks.find(t => t.id === taskId);
             if (task && subtaskText.trim()) {
@@ -1342,13 +1438,51 @@
             }
         }
 
-        function deleteSubtask(taskId, subtaskId) {
+        function openEditSubtaskModal(taskId, subtaskId) {
             const task = tasks.find(t => t.id === taskId);
-            if (task) {
-                task.subtasks = task.subtasks.filter(st => st.id !== subtaskId);
-                saveTasks();
-                filteredTasks = [...tasks];
-                renderAllTasks();
+            if (!task) return;
+            
+            const subtask = task.subtasks.find(st => st.id === subtaskId);
+            if (!subtask) return;
+
+            editingTaskId = taskId;
+            editingSubtaskId = subtaskId;
+            document.getElementById('editSubtaskText').value = subtask.text;
+            document.getElementById('editSubtaskModal').classList.add('show');
+        }
+
+        function closeEditSubtaskModal() {
+            document.getElementById('editSubtaskModal').classList.remove('show');
+            editingTaskId = null;
+            editingSubtaskId = null;
+        }
+
+        function saveEditedSubtask() {
+            const task = tasks.find(t => t.id === editingTaskId);
+            if (!task) return;
+
+            const subtask = task.subtasks.find(st => st.id === editingSubtaskId);
+            if (!subtask) return;
+
+            subtask.text = document.getElementById('editSubtaskText').value.trim();
+            
+            saveTasks();
+            filteredTasks = [...tasks];
+            renderAllTasks();
+            closeEditSubtaskModal();
+            showNotification('תת-המשימה עודכנה! ✏️');
+        }
+
+        function deleteSubtask(taskId, subtaskId) {
+            if (confirm('למחוק תת-משימה זו?')) {
+                const task = tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.subtasks = task.subtasks.filter(st => st.id !== subtaskId);
+                    saveTasks();
+                    filteredTasks = [...tasks];
+                    renderAllTasks();
+                    showNotification('תת-המשימה נמחקה');
+                }
             }
         }
 
@@ -1453,9 +1587,18 @@
             const isOverdue = task.date && new Date(task.date) < new Date() && task.status !== 'done';
             const reminderBadge = shouldShowReminder(task) ? '<span class="reminder-badge">🔔 מחר!</span>' : '';
 
+            const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+            const collapseIcon = hasSubtasks ? `<span class="collapse-icon ${task.expanded ? 'expanded' : ''}">▶</span>` : '';
+            const subtaskCount = hasSubtasks ? `(${task.subtasks.filter(st => st.completed).length}/${task.subtasks.length})` : '';
+
             let subtasksHTML = '';
-            if (task.subtasks && task.subtasks.length > 0) {
-                subtasksHTML = '<div class="subtasks-container">';
+            if (hasSubtasks) {
+                subtasksHTML = `<div class="subtasks-accordion ${task.expanded ? 'expanded' : ''}">`;
+                subtasksHTML += '<div class="subtasks-container">';
+                subtasksHTML += '<div class="subtasks-header">';
+                subtasksHTML += `<span class="subtasks-title">תתי-משימות ${subtaskCount}</span>`;
+                subtasksHTML += '</div>';
+                
                 task.subtasks.forEach(subtask => {
                     const completedClass = subtask.completed ? 'completed' : '';
                     subtasksHTML += `
@@ -1463,32 +1606,46 @@
                             <input type="checkbox" ${subtask.completed ? 'checked' : ''} 
                                    onchange="toggleSubtask(${task.id}, ${subtask.id})">
                             <span class="subtask-text">${subtask.text}</span>
-                            <button class="subtask-delete" onclick="deleteSubtask(${task.id}, ${subtask.id})">✕</button>
+                            <div class="subtask-actions">
+                                <button class="subtask-btn subtask-edit" onclick="openEditSubtaskModal(${task.id}, ${subtask.id})">✏️</button>
+                                <button class="subtask-btn subtask-delete" onclick="deleteSubtask(${task.id}, ${subtask.id})">✕</button>
+                            </div>
                         </div>
                     `;
                 });
-                subtasksHTML += '</div>';
+                
+                subtasksHTML += `
+                    <div class="add-subtask-form">
+                        <input type="text" placeholder="הוסף תת-משימה..." id="subtask-input-${task.id}">
+                        <button class="btn-small" onclick="handleAddSubtask(${task.id})">+</button>
+                    </div>
+                </div></div>`;
+            } else {
+                subtasksHTML = `
+                    <div class="add-subtask-form" style="margin-top: 12px;">
+                        <input type="text" placeholder="הוסף תת-משימה..." id="subtask-input-${task.id}">
+                        <button class="btn-small" onclick="handleAddSubtask(${task.id})">+</button>
+                    </div>
+                `;
             }
 
-            const addSubtaskForm = `
-                <div class="add-subtask-form">
-                    <input type="text" placeholder="הוסף תת-משימה..." id="subtask-input-${task.id}">
-                    <button class="btn-small" onclick="handleAddSubtask(${task.id})">+</button>
-                </div>
-            `;
-
             div.innerHTML = `
-                <div class="task-header">
-                    <div class="task-title">${task.title}</div>
-                    <span class="priority-badge ${priorityClass}">${priorityText[task.priority]}</span>
-                </div>
-                <div class="task-meta">
-                    <span class="category-tag">${task.category}</span>
-                    ${dateText ? `<span class="meta-item">${dateText}${isOverdue ? ' ⚠️' : ''}</span>` : ''}
-                    ${reminderBadge}
+                <div class="task-main" ${hasSubtasks ? `onclick="toggleSubtasksAccordion(${task.id})"` : ''}>
+                    <div class="task-header">
+                        <div class="task-title-row">
+                            ${collapseIcon}
+                            <div class="task-title">${task.title}</div>
+                        </div>
+                        <span class="priority-badge ${priorityClass}">${priorityText[task.priority]}</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="category-tag">${task.category}</span>
+                        ${dateText ? `<span class="meta-item">${dateText}${isOverdue ? ' ⚠️' : ''}</span>` : ''}
+                        ${reminderBadge}
+                        ${hasSubtasks && !task.expanded ? `<span class="meta-item">${subtaskCount}</span>` : ''}
+                    </div>
                 </div>
                 ${subtasksHTML}
-                ${addSubtaskForm}
                 <div class="task-actions">
                     <button class="btn-small btn-edit" onclick="openEditModal(${task.id})">✏️ ערוך</button>
                     ${task.status !== 'todo' ? '<button class="btn-small" onclick="moveTask(' + task.id + ', \'todo\')">◀ לעשות</button>' : ''}
@@ -1737,6 +1894,12 @@
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeEditModal();
+            }
+        });
+
+        document.getElementById('editSubtaskModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditSubtaskModal();
             }
         });
 
